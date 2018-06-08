@@ -5,7 +5,7 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <memory.h> 
-#include <stdlib.h>  //for malloc
+#include <stdlib.h> 
 
 #define BUFFER_SIZE 1024
 
@@ -13,37 +13,37 @@ int main()
 {
     int sockcd;
     struct sockaddr_in server;
-    char filepath[100];//file to translate
+    char filepath[100];
 
     FILE *fp;
-    int lenpath; //filepath length
-    char *buffer;//file buffer
+    int lenpath; 
+    char *buffer;
     int fileTrans;
     buffer = (char *)malloc(sizeof(char)*BUFFER_SIZE);
-    bzero(buffer,BUFFER_SIZE); 
-    //memset(buffer,0,sizeof(buffer));
+    bzero(buffer,BUFFER_SIZE);//初始化buffer，将buffer指向的地址长为BUFFER_SIZE置零
+    
 
-    if((sockcd = socket(AF_INET,SOCK_STREAM,0))<0)
+    if((sockcd = socket(AF_INET,SOCK_STREAM,0))<0)//建立客户端socket，类型IPV4，TCP协议
     {
         printf("socket build error!\n");
     }
-    memset(&server,0,sizeof(server));
-    server.sin_family= AF_INET;
-    server.sin_port = htons(9000);
-    if(inet_pton(AF_INET,"118.228.169.92",&server.sin_addr)<0)
+    memset(&server,0,sizeof(server));//初始化服务器地址
+    server.sin_family= AF_INET;//类型为ipv4
+    server.sin_port = htons(9000);//端口号9000
+    if(inet_pton(AF_INET,"118.228.169.92",&server.sin_addr)<0)//将网络地址转化为二进制
     {
         printf("inet_pton error!\n");
     }
 
-    if(connect(sockcd,(struct sockaddr*)&server,sizeof(server))<0)
+    if(connect(sockcd,(struct sockaddr*)&server,sizeof(server))<0)//将参数sockcd的socket连至参数server指定的网络地址
     {
         printf("connect error!\n");
-    }//connect with server 
+    }
 
     printf("file path:\n");
-    scanf("%s",filepath);//get filepath
+    scanf("%s",filepath);//获取文件路径
 
-    fp = fopen(filepath,"r");//opne file
+    fp = fopen(filepath,"r");//打开文件，读操作
     if(fp==NULL)
     {
         printf("filepath not found!\n");
@@ -51,7 +51,7 @@ int main()
 
     }
     printf("filepath : %s\n",filepath);
-    lenpath = send(sockcd,filepath,strlen(filepath),0);// put file path to sever 
+    lenpath = send(sockcd,filepath,strlen(filepath),0);//将数据从sockcd传给服务器，并记录以便后续判断
     if(lenpath<0)
     {
         printf("filepath send error!\n");
@@ -61,10 +61,10 @@ int main()
         printf("filepath send success!\n");
     }
     sleep(3);
-    while((fileTrans = fread(buffer,sizeof(char),BUFFER_SIZE,fp))>0)
+    while((fileTrans = fread(buffer,sizeof(char),BUFFER_SIZE,fp))>0)//将文件内容读入缓冲区
     {
         printf("fileTrans =%d\n",fileTrans);
-        if(send(sockcd,buffer,fileTrans,0)<0)
+        if(send(sockcd,buffer,fileTrans,0)<0)//将缓冲区内容经sockcd发送给服务器，并作判断
         {
             printf("send failed!\n");
             break;      
