@@ -14,42 +14,43 @@ int main(){
     struct sockaddr_in my_addr,client_addr;  
     socklen_t len;  
     char buf[100];  
-  
-    if((sock=socket(AF_INET,SOCK_STREAM,0))<0){  
-        printf("socket create error!\n");  
+  //建立socket
+    if((sock=socket(AF_INET,SOCK_STREAM,0))<0){  //初始化socket，地址类型ipv4，TCP协议
+        printf("socket create error!\n");  //若初始化失败则输出该语句
         exit(1);  
     }  
-    memset(&my_addr,0,sizeof(my_addr));  
-    my_addr.sin_family=AF_INET;  
-    my_addr.sin_port=htons(PORT);  
-    my_addr.sin_addr.s_addr=INADDR_ANY;  
+    memset(&my_addr,0,sizeof(my_addr));  //从my_mddr指针所指的地址开始将my_addr字节置0
+    my_addr.sin_family=AF_INET;  //TCP/IP协议
+    my_addr.sin_port=htons(PORT);  //将16位端口号字符顺序转换成网络字符顺序
+    my_addr.sin_addr.s_addr=INADDR_ANY;  //将字符串的IP地址转化为网络字符顺序
   
-    if(bind(sock,(struct sockaddr*)&my_addr,sizeof(my_addr))==-1){  
-        printf("bind error!\n");  
+    if(bind(sock,(struct sockaddr*)&my_addr,sizeof(my_addr))==-1){  //绑定socket与地址捆绑
+        printf("bind error!\n");  //若绑定失败则输出该语句
         exit(1);  
     }  
-    if(listen(sock,5)<0){  
+    if(listen(sock,5)<0){ // 使用listen监听
         printf("listen error!\n");  
         exit(1);  
     }  
     len=sizeof(struct sockaddr);  
-new_sock=accept(sock,(struct sockaddr*)&client_addr,&len);
+new_sock=accept(sock,(struct sockaddr*)&client_addr,&len);//accept接受连接请求，返回一个新的socket
     if(new_sock < 0){  
         printf("accept error!\n");  
         exit(1);  
-    }else{  
+    }
+    else{  
         printf("server: get connection from %s,port %d socket %d \n",inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port),new_sock);  
   
     }  
     while(1){  
-        memset(buf,0,100);  
+        memset(buf,0,100);  //初始化缓冲区
         printf("Input message to send: ");  
-        fgets(buf,100,stdin);  
+        fgets(buf,100,stdin);  //将内容读入缓冲区
         if(!strncasecmp(buf,"quit",4)){  
             printf("server is closing...\n");  
             break;  
         }  
-        len=send(new_sock,buf,strlen(buf)-1,0);  
+        len=send(new_sock,buf,strlen(buf)-1,0);  //将buf的数据从new_sock传给客户端
         if(len<0){  
             printf("send error!\n");  
             exit(1);  
@@ -58,7 +59,7 @@ new_sock=accept(sock,(struct sockaddr*)&client_addr,&len);
         }  
         printf("------------------------------\n");  
         memset(buf,0,100);  
-        len=recv(new_sock,buf,100,0);  
+        len=recv(new_sock,buf,100,0); //接收从客户端经new_sock传来的数据 
         if(len<0){  
             printf("recv error!\n");  
             exit(1);  
